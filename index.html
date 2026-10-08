@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Futebol de Botão — TikTok LIVE</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <h1>Futebol de Botão — TikTok LIVE</h1>
+    <p class="subtitle">1.000 curtidas habilitam o gol.</p>
+
+    <section class="field-wrap">
+      <div id="field" class="field">
+        <div class="halfway"></div>
+        <div class="center-circle"></div>
+        <div class="center-dot"></div>
+        <div class="box left-box"></div>
+        <div class="box right-box"></div>
+        <div class="goal left-goal"></div>
+        <div class="goal right-goal"></div>
+        <div id="ball" class="ball">⚽</div>
+        <div id="p0" class="player p0">A</div>
+        <div id="p1" class="player p1">B</div>
+        <div id="p2" class="player p2">C</div>
+        <div id="p3" class="player p3">D</div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <button id="start">Iniciar partida</button>
+      <button id="pause">Pausar</button>
+      <button id="reset">Resetar</button>
+      <button data-like="0">+100 curtidas A</button>
+      <button data-like="1">+100 curtidas B</button>
+      <button data-like="2">+100 curtidas C</button>
+      <button data-like="3">+100 curtidas D</button>
+      <button id="testGoal">Testar gol</button>
+    </section>
+
+    <section class="gifts">
+      <h2>Presentes de teste</h2>
+      <button data-gift="5655">🌹 Rose +1</button>
+      <button data-gift="5487">🫶 Finger Heart +5</button>
+      <button data-gift="5780">💐 Bouquet +20</button>
+      <button data-gift="5879">🍩 Doughnut +20</button>
+      <button data-gift="14690">⚽ League Ball</button>
+      <button data-gift="63005">🏆 Soccer Holo</button>
+    </section>
+
+    <section class="panel">
+      <h2>Jogadores</h2>
+      <div id="players"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Artilharia</h2>
+      <ol id="ranking"></ol>
+    </section>
+
+    <audio id="crowd" src="/audio/torcida.mp3" loop preload="auto"></audio>
+    <audio id="goalSound" src="/audio/gol.mp3" preload="auto"></audio>
+  </main>
+  <script src="/game.js"></script>
+</body>
+</html>
