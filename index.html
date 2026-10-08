@@ -1,124 +1,178 @@
-<!doctype html>
+```html
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Futebol de Botão | TikTok LIVE</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futebol de Botão — TikTok LIVE</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <header class="header">
+  <header class="topbar">
     <div class="brand">
-      <div class="brand-ball">⚽</div>
+      <span class="brand-ball">⚽</span>
       <div>
         <h1>FUTEBOL DE BOTÃO</h1>
-        <span>INTERATIVO • TIKTOK LIVE</span>
+        <p>INTERAÇÃO AO VIVO</p>
       </div>
     </div>
-    <div class="connection"><i id="statusDot"></i><span id="statusText">Conectando ao TikTok…</span></div>
+
+    <div class="match-info">
+      <div class="score">
+        <span id="homeScore">0</span>
+        <span class="score-separator">:</span>
+        <span id="awayScore">0</span>
+      </div>
+      <div id="clock">00:00</div>
+      <div id="connectionStatus" class="status">Conectando...</div>
+    </div>
   </header>
 
   <main>
-    <section class="scoreboard">
-      <div class="team"><span class="team-mark red-mark"></span><div><b>TIME VERMELHO</b><small>MANDANTE</small></div></div>
-      <div class="score"><strong id="scoreA">0</strong><span>:</span><strong id="scoreB">0</strong></div>
-      <div class="team away"><div><b>TIME AZUL</b><small>VISITANTE</small></div><span class="team-mark blue-mark"></span></div>
-      <div class="clock"><small>PARTIDA</small><strong id="clock">00:00</strong></div>
-    </section>
-
-    <section class="stadium">
-      <div class="stadium-lights"></div>
-      <div class="pitch-wrap">
-        <div id="pitch" class="pitch">
-          <div class="grass-stripes"></div>
-          <div class="touchline"></div>
-          <div class="halfway"></div>
-          <div class="center-circle"></div>
-          <div class="center-spot"></div>
-
-          <div class="penalty-area left-area"></div>
-          <div class="penalty-area right-area"></div>
-          <div class="goal-area left-goal-area"></div>
-          <div class="goal-area right-goal-area"></div>
-          <div class="penalty-spot left-spot"></div>
-          <div class="penalty-spot right-spot"></div>
-          <div class="penalty-arc left-arc"></div>
-          <div class="penalty-arc right-arc"></div>
-          <div class="corner c1"></div><div class="corner c2"></div>
-          <div class="corner c3"></div><div class="corner c4"></div>
-
-          <div class="goal-frame left-frame"><div class="net"></div></div>
-          <div class="goal-frame right-frame"><div class="net"></div></div>
-
-          <div id="players"></div>
-          <div id="ball" class="ball" aria-label="Bola">⚽</div>
-          <div id="goalFlash" class="goal-flash">GOOOOL!</div>
-        </div>
+    <section class="pitch-section">
+      <div class="team-labels">
+        <span class="home-label">TIME VERMELHO</span>
+        <span class="away-label">TIME AZUL</span>
       </div>
-      <div class="stadium-footer">
-        <span>● CAMPO AO VIVO</span>
-        <span id="possession">BOLA EM DISPUTA</span>
+
+      <div id="pitch" class="pitch">
+        <div class="pitch-line halfway"></div>
+        <div class="center-circle"></div>
+        <div class="center-spot"></div>
+
+        <div class="penalty-area penalty-left"></div>
+        <div class="goal-area goal-area-left"></div>
+        <div class="penalty-arc arc-left"></div>
+        <div class="goal goal-left"></div>
+
+        <div class="penalty-area penalty-right"></div>
+        <div class="goal-area goal-area-right"></div>
+        <div class="penalty-arc arc-right"></div>
+        <div class="goal goal-right"></div>
+
+        <div id="playersLayer"></div>
+        <div id="ball" class="ball">⚽</div>
+      </div>
+
+      <div class="pitch-footer">
+        <span>❤️ Presentes ajudam seu time</span>
+        <span id="playerCount">Jogadores: 0</span>
       </div>
     </section>
 
-    <div class="columns">
-      <section class="panel">
-        <div class="panel-heading"><div><span class="eyebrow">PARTICIPE DA PARTIDA</span><h2>Presentes e interações</h2></div><span class="live-pill">LIVE</span></div>
-        <p class="muted">As curtidas contam como participação. Os presentes ativam jogadas especiais.</p>
-        <div class="gift-grid">
-          <article class="gift">
-            <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/rose.png" alt="Rose" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-            <span class="gift-fallback">🌹</span><div><b>Rose</b><small>+1 participação</small></div>
-          </article>
-          <article class="gift">
-            <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a4c4dc437fd3a6632aba149769491f49.png~tplv-obj.webp" alt="Finger Heart" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-            <span class="gift-fallback">🫶</span><div><b>Finger Heart</b><small>+5 participação</small></div>
-          </article>
-          <article class="gift">
-            <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/bouquet.png" alt="Bouquet Flower" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-            <span class="gift-fallback">💐</span><div><b>Bouquet Flower</b><small>+20 participação</small></div>
-          </article>
-          <article class="gift">
-            <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/doughnut.png" alt="Doughnut" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-            <span class="gift-fallback">🍩</span><div><b>Doughnut</b><small>+20 participação</small></div>
-          </article>
-          <article class="gift special">
-            <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/league-ball.png" alt="League Ball" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-            <span class="gift-fallback">⚽</span><div><b>League Ball</b><small>Jogada especial</small></div>
-          </article>
-          <article class="gift special">
-            <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/soccer-holo.png" alt="Soccer Holo" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-            <span class="gift-fallback">🏆</span><div><b>Soccer Holo</b><small>Jogada rara</small></div>
-          </article>
-        </div>
-        <div class="participation">
-          <div><small>PARTICIPAÇÃO TOTAL</small><strong id="totalParticipation">0</strong></div>
-          <div class="participation-ball">⚽</div>
-        </div>
-      </section>
+    <section class="dashboard">
+      <div class="panel">
+        <h2>🎁 Presentes que valem votos</h2>
 
-      <section class="panel">
-        <div class="panel-heading"><div><span class="eyebrow">DESTAQUES</span><h2>Artilharia</h2></div><span class="trophy">🏆</span></div>
-        <div id="ranking" class="ranking"><p class="muted">A artilharia aparece quando sair o primeiro gol.</p></div>
-        <div class="panel-heading activity-heading"><div><span class="eyebrow">AO VIVO</span><h2>Últimos lances</h2></div></div>
-        <div id="activity" class="activity" aria-live="polite"><p class="muted">Aguardando eventos da LIVE…</p></div>
-      </section>
-    </div>
+        <div class="gift-list">
+          <div class="gift-item">
+            <span class="gift-icon">🌹</span>
+            <div class="gift-description">
+              <strong>Rosa</strong>
+              <small>+1 ponto · Time vermelho</small>
+            </div>
+          </div>
+
+          <div class="gift-item">
+            <span class="gift-icon">💗</span>
+            <div class="gift-description">
+              <strong>Finger Heart</strong>
+              <small>+5 pontos · Time vermelho</small>
+            </div>
+          </div>
+
+          <div class="gift-item">
+            <span class="gift-icon">💐</span>
+            <div class="gift-description">
+              <strong>Buquê</strong>
+              <small>+20 pontos · Time vermelho</small>
+            </div>
+          </div>
+
+          <div class="gift-item">
+            <span class="gift-icon">🍩</span>
+            <div class="gift-description">
+              <strong>Donut</strong>
+              <small>+20 pontos · Time azul</small>
+            </div>
+          </div>
+
+          <div class="gift-item">
+            <span class="gift-icon">⚽</span>
+            <div class="gift-description">
+              <strong>Bola de futebol</strong>
+              <small>Presente especial</small>
+            </div>
+          </div>
+
+          <div class="gift-item">
+            <span class="gift-icon">✨</span>
+            <div class="gift-description">
+              <strong>Presente raro</strong>
+              <small>Evento especial</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>📊 Participação dos times</h2>
+
+        <div class="team-progress">
+          <div class="progress-heading">
+            <span>Time vermelho</span>
+            <strong id="homePercent">50%</strong>
+          </div>
+          <div class="progress-track">
+            <div id="homeBar" class="progress-fill home-fill"></div>
+          </div>
+        </div>
+
+        <div class="team-progress">
+          <div class="progress-heading">
+            <span>Time azul</span>
+            <strong id="awayPercent">50%</strong>
+          </div>
+          <div class="progress-track">
+            <div id="awayBar" class="progress-fill away-fill"></div>
+          </div>
+        </div>
+
+        <div class="participation-total">
+          Participações: <strong id="participationTotal">0</strong>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>🏆 Ranking da partida</h2>
+        <ol id="ranking" class="ranking">
+          <li class="empty-ranking">Aguardando participantes...</li>
+        </ol>
+      </div>
+
+      <div class="panel">
+        <h2>📢 Últimas atividades</h2>
+        <ul id="activity" class="activity">
+          <li>Aguardando conexão com a LIVE...</li>
+        </ul>
+      </div>
+    </section>
   </main>
 
   <div id="startGate" class="start-gate">
     <div class="start-card">
-      <div class="start-emblem">⚽</div>
-      <span class="eyebrow">TRANSMISSÃO INTERATIVA</span>
-      <h2>Preparado para a partida?</h2>
-      <p>Inicie para liberar os sons do estádio e acompanhar as interações do TikTok LIVE.</p>
-      <button id="startButton">▶ INICIAR PARTIDA</button>
-      <small>O áudio depende das permissões do navegador.</small>
+      <div class="start-ball">⚽</div>
+      <h2>Futebol de Botão</h2>
+      <p>Entre na partida e dispute o jogo com os presentes da LIVE.</p>
+      <p class="audio-notice">O áudio será ativado ao iniciar.</p>
+      <button id="startButton" type="button">▶ INICIAR PARTIDA</button>
     </div>
   </div>
 
-  <audio id="crowd" src="/audio/torcida.mp3" loop preload="auto"></audio>
-  <audio id="goalSound" src="/audio/gol.mp3" preload="auto"></audio>
+  <audio id="crowd" src="/audio/torcida.mp3" loop preload="none"></audio>
+  <audio id="goalSound" src="/audio/gol.mp3" preload="none"></audio>
+
   <script src="/game.js"></script>
 </body>
 </html>
+```
