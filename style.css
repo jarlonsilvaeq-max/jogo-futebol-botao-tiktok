@@ -1,4 +1,4 @@
-
+```css
 :root {
   color-scheme: dark;
   --background: #080d10;
@@ -14,6 +14,10 @@
   box-sizing: border-box;
 }
 
+html {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   color: #f4f8f9;
@@ -23,59 +27,63 @@ body {
   font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+/* CABEÇALHO COMPACTO */
+
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  padding: 14px 22px;
+  gap: 12px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--border);
-  background: rgba(8, 13, 16, .94);
+  background: rgba(8, 13, 16, .96);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9px;
+  min-width: 0;
 }
 
 .brand-ball {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
   background: #1c3430;
-  font-size: 25px;
+  font-size: 20px;
 }
 
 .brand h1 {
   margin: 0;
-  font-size: clamp(14px, 2vw, 20px);
-  letter-spacing: .08em;
+  font-size: clamp(12px, 1.4vw, 17px);
+  letter-spacing: .05em;
 }
 
 .brand p {
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   color: var(--muted);
-  font-size: 10px;
-  letter-spacing: .16em;
+  font-size: 9px;
+  letter-spacing: .1em;
 }
 
 .match-info {
   display: flex;
   align-items: center;
-  gap: 15px;
-  font-size: 12px;
+  gap: 10px;
   color: var(--muted);
+  font-size: 11px;
 }
 
 .score {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: white;
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 900;
 }
 
@@ -84,16 +92,16 @@ body {
 }
 
 #clock {
-  padding: 7px 9px;
+  padding: 5px 8px;
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: 6px;
   color: white;
   font-variant-numeric: tabular-nums;
 }
 
 .status {
-  max-width: 150px;
-  font-size: 11px;
+  max-width: 145px;
+  font-size: 10px;
 }
 
 .status.connected {
@@ -104,19 +112,32 @@ body {
   color: #ffb1b1;
 }
 
+/* PAINEL PRINCIPAL: CAMPO À ESQUERDA, DETALHES À DIREITA */
+
 main {
-  width: min(1250px, 100%);
-  margin: auto;
-  padding: 18px;
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(280px, .85fr);
+  grid-template-areas:
+    "pitch dashboard";
+  align-items: start;
+  gap: 10px;
 }
 
+/* CAMPO */
+
 .pitch-section {
+  grid-area: pitch;
+  min-width: 0;
   overflow: hidden;
-  padding: 12px;
+  padding: 9px;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 12px;
   background: #10191d;
-  box-shadow: 0 15px 50px #0005;
+  box-shadow: 0 10px 30px #0005;
 }
 
 .team-labels,
@@ -124,11 +145,11 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  padding: 5px 4px 11px;
-  font-size: 11px;
+  gap: 8px;
+  padding: 3px 3px 7px;
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: .08em;
+  letter-spacing: .06em;
 }
 
 .home-label {
@@ -145,7 +166,7 @@ main {
   aspect-ratio: 16 / 9;
   overflow: hidden;
   isolation: isolate;
-  border: 2px solid rgba(255,255,255,.82);
+  border: 2px solid rgba(255,255,255,.88);
   border-radius: 4px;
   background:
     repeating-linear-gradient(
@@ -157,11 +178,13 @@ main {
     );
 }
 
+/* MARCAÇÕES DO CAMPO */
+
 .pitch::before {
   position: absolute;
   inset: 0;
   z-index: 1;
-  border: 1px solid rgba(255,255,255,.65);
+  border: 1px solid rgba(255,255,255,.7);
   content: "";
   pointer-events: none;
 }
@@ -172,7 +195,7 @@ main {
   top: 0;
   bottom: 0;
   left: 50%;
-  border-left: 1.5px solid rgba(255,255,255,.78);
+  border-left: 1.5px solid rgba(255,255,255,.85);
 }
 
 .center-circle {
@@ -183,7 +206,7 @@ main {
   width: 17%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
-  border: 1.5px solid rgba(255,255,255,.8);
+  border: 1.5px solid rgba(255,255,255,.85);
   border-radius: 50%;
 }
 
@@ -205,7 +228,7 @@ main {
   z-index: 1;
   top: 22%;
   height: 56%;
-  border: 1.5px solid rgba(255,255,255,.78);
+  border: 1.5px solid rgba(255,255,255,.82);
 }
 
 .penalty-left {
@@ -242,7 +265,7 @@ main {
   top: 37%;
   width: 10%;
   height: 26%;
-  border: 1.5px solid rgba(255,255,255,.78);
+  border: 1.5px solid rgba(255,255,255,.82);
   border-radius: 50%;
 }
 
@@ -270,13 +293,15 @@ main {
 
 .goal-left {
   left: -1px;
-  transform: translateX(-35%);
+  transform: translateX(-15%);
 }
 
 .goal-right {
   right: -1px;
-  transform: translateX(35%);
+  transform: translateX(15%);
 }
+
+/* JOGADORES E BOLA */
 
 #playersLayer {
   position: absolute;
@@ -289,7 +314,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: clamp(23px, 3.1vw, 39px);
+  width: clamp(20px, 2.7vw, 34px);
   transform: translate(-50%, -50%);
   transition: left .18s linear, top .18s linear;
   pointer-events: none;
@@ -304,7 +329,7 @@ main {
   border-radius: 50%;
   background: #152127;
   box-shadow: 0 2px 6px #0008;
-  font-size: clamp(12px, 1.6vw, 20px);
+  font-size: clamp(11px, 1.4vw, 17px);
   line-height: 1;
 }
 
@@ -317,14 +342,14 @@ main {
 }
 
 .player-name {
-  max-width: 90px;
+  max-width: 75px;
   overflow: hidden;
   margin-top: 2px;
   padding: 2px 4px;
   border-radius: 4px;
-  background: #07100dd9;
+  background: #07100de8;
   color: white;
-  font-size: clamp(7px, .85vw, 10px);
+  font-size: clamp(7px, .7vw, 9px);
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -337,106 +362,116 @@ main {
   left: 50%;
   display: grid;
   place-items: center;
-  width: clamp(18px, 2.2vw, 28px);
+  width: clamp(17px, 2vw, 25px);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   filter: drop-shadow(0 2px 3px #0008);
-  font-size: clamp(16px, 2vw, 25px);
+  font-size: clamp(15px, 1.8vw, 23px);
   transition: left .08s linear, top .08s linear;
   pointer-events: none;
 }
 
 .pitch-footer {
-  padding: 11px 4px 1px;
+  padding: 7px 3px 1px;
   color: var(--muted);
-  font-size: 10px;
-  letter-spacing: .02em;
+  font-size: 9px;
+  letter-spacing: .01em;
 }
 
 .pitch-footer span:first-child {
   color: #8ce4ac;
 }
 
+/* PRESENTES ABAIXO DO CAMPO */
+
 .dashboard {
+  grid-area: dashboard;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+  margin: 0;
 }
 
 .panel {
   min-width: 0;
-  padding: 16px;
+  padding: 11px;
   border: 1px solid var(--border);
-  border-radius: 13px;
+  border-radius: 10px;
   background: linear-gradient(145deg, #131e23, #0e1519);
 }
 
 .panel h2 {
-  margin: 0 0 15px;
-  font-size: 15px;
+  margin: 0 0 9px;
+  font-size: 13px;
 }
+
+/* LISTA DE PRESENTES */
 
 .gift-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .gift-item {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
   min-width: 0;
-  padding: 10px;
+  padding: 7px;
   border: 1px solid #293a40;
-  border-radius: 9px;
+  border-radius: 8px;
   background: #0a1114;
 }
 
 .gift-icon {
   display: grid;
   place-items: center;
-  width: 33px;
-  height: 33px;
+  width: 29px;
+  height: 29px;
   flex-shrink: 0;
-  border-radius: 9px;
+  border-radius: 8px;
   background: #1b2a2f;
-  font-size: 21px;
+  font-size: 19px;
 }
 
 .gift-description {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
 }
 
 .gift-description strong {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .gift-description small {
   color: var(--muted);
   font-size: 9px;
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
+/* BARRAS DE PARTICIPAÇÃO */
+
 .team-progress {
-  margin: 15px 0;
+  margin: 10px 0;
 }
 
 .progress-heading {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 7px;
+  gap: 6px;
+  margin-bottom: 5px;
   color: #c7d4d8;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .progress-track {
   overflow: hidden;
-  height: 10px;
+  height: 9px;
   border-radius: 20px;
   background: #263338;
 }
@@ -457,22 +492,24 @@ main {
 }
 
 .participation-total {
-  margin-top: 18px;
-  padding-top: 12px;
+  margin-top: 10px;
+  padding-top: 9px;
   border-top: 1px solid var(--border);
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .participation-total strong {
   color: white;
 }
 
+/* RANKING E ATIVIDADE */
+
 .ranking,
 .activity {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 5px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -481,9 +518,9 @@ main {
 .ranking-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
-  padding: 8px;
+  padding: 6px;
   border-radius: 7px;
   background: #0a1114;
 }
@@ -491,25 +528,25 @@ main {
 .rank-number {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
   border-radius: 6px;
   background: #26383e;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
 }
 
 .rank-name {
   overflow: hidden;
   flex: 1;
-  font-size: 12px;
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .rank-points {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .rank-points.home {
@@ -522,17 +559,19 @@ main {
 
 .empty-ranking {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .activity li {
-  padding: 8px 10px;
+  padding: 6px 8px;
   border-left: 2px solid #2d5960;
   background: #0b1215;
   color: #c7d4d8;
-  font-size: 11px;
+  font-size: 10px;
   overflow-wrap: anywhere;
 }
+
+/* ANIMAÇÃO DE GOL */
 
 .goal-flash {
   position: absolute;
@@ -556,6 +595,8 @@ main {
   100% { opacity: 0; scale: .95; }
 }
 
+/* TELA INICIAL */
+
 .start-gate {
   position: fixed;
   z-index: 100;
@@ -563,7 +604,7 @@ main {
   display: grid;
   place-items: center;
   padding: 20px;
-  background: #030708eF;
+  background: #030708ef;
   backdrop-filter: blur(8px);
 }
 
@@ -573,7 +614,7 @@ main {
 
 .start-card {
   width: min(400px, 100%);
-  padding: 28px;
+  padding: 25px;
   border: 1px solid #2c4249;
   border-radius: 18px;
   background: #101b20;
@@ -582,8 +623,8 @@ main {
 }
 
 .start-ball {
-  margin-bottom: 12px;
-  font-size: 46px;
+  margin-bottom: 10px;
+  font-size: 42px;
 }
 
 .start-card h2 {
@@ -604,7 +645,7 @@ main {
 #startButton {
   width: 100%;
   margin-top: 10px;
-  padding: 14px 18px;
+  padding: 12px 16px;
   border: 0;
   border-radius: 9px;
   background: linear-gradient(100deg, #18a45b, #087c41);
@@ -622,27 +663,52 @@ main {
   transform: scale(.99);
 }
 
-@media (max-width: 650px) {
+/* TELAS DE NOTEBOOK E JANELAS MENORES */
+
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "pitch"
+      "dashboard";
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* CELULAR */
+
+@media (max-width: 600px) {
   .topbar {
     align-items: flex-start;
-    padding: 12px;
+    padding: 9px;
   }
 
   .brand-ball {
-    width: 36px;
-    height: 36px;
-    font-size: 20px;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+
+  .brand h1 {
+    font-size: 11px;
+  }
+
+  .brand p {
+    font-size: 8px;
   }
 
   .match-info {
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: 7px;
+    gap: 5px;
   }
 
   .score {
-    gap: 5px;
-    font-size: 20px;
+    gap: 4px;
+    font-size: 18px;
   }
 
   .status {
@@ -652,43 +718,44 @@ main {
   }
 
   main {
-    padding: 10px;
+    padding: 7px;
+    gap: 8px;
   }
 
   .pitch-section {
-    padding: 7px;
+    padding: 6px;
   }
 
   .team-labels {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .dashboard {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 8px;
   }
 
   .panel {
-    padding: 13px;
+    padding: 10px;
   }
 
   .gift-list {
-    gap: 6px;
+    gap: 5px;
   }
 
   .gift-item {
-    padding: 7px;
-    gap: 6px;
+    padding: 6px;
+    gap: 5px;
   }
 
   .gift-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 18px;
+    width: 25px;
+    height: 25px;
+    font-size: 17px;
   }
 
   .gift-description strong {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .gift-description small {
@@ -709,3 +776,4 @@ main {
     transition-duration: .01ms !important;
   }
 }
+```
