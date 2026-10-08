@@ -1,67 +1,221 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Futebol de Botão — TikTok LIVE</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <main>
-    <h1>Futebol de Botão — TikTok LIVE</h1>
-    <p class="subtitle">1.000 curtidas habilitam o gol.</p>
 
-    <section class="field-wrap">
-      <div id="field" class="field">
-        <div class="halfway"></div>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="ball-icon">⚽</span>
+    <div>
+      <strong>FUTEBOL DE BOTÃO</strong>
+      <small>TIKTOK LIVE</small>
+    </div>
+  </div>
+
+  <div class="match-status">
+    <span class="live-dot"></span>
+    AO VIVO
+  </div>
+</header>
+
+<main>
+
+  <section class="scoreboard">
+    <div class="team">
+      <span class="team-color red"></span>
+      <strong>TIME A</strong>
+    </div>
+
+    <div class="score">
+      <strong id="scoreA">0</strong>
+      <span>×</span>
+      <strong id="scoreB">0</strong>
+    </div>
+
+    <div class="team right">
+      <strong>TIME B</strong>
+      <span class="team-color blue"></span>
+    </div>
+
+    <div class="match-time" id="matchTime">00:00</div>
+  </section>
+
+  <section class="game-layout">
+
+    <div class="field-container">
+
+      <div class="field">
+
+        <div class="field-line center-line"></div>
         <div class="center-circle"></div>
         <div class="center-dot"></div>
-        <div class="box left-box"></div>
-        <div class="box right-box"></div>
+
+        <div class="penalty left-penalty"></div>
+        <div class="penalty right-penalty"></div>
+
         <div class="goal left-goal"></div>
         <div class="goal right-goal"></div>
+
         <div id="ball" class="ball">⚽</div>
-        <div id="p0" class="player p0">A</div>
-        <div id="p1" class="player p1">B</div>
-        <div id="p2" class="player p2">C</div>
-        <div id="p3" class="player p3">D</div>
+
+        <div class="player red-player" id="player0">
+          <img src="" alt="">
+          <span class="player-name">@aguardando</span>
+        </div>
+
+        <div class="player red-player" id="player1">
+          <img src="" alt="">
+          <span class="player-name">@aguardando</span>
+        </div>
+
+        <div class="player red-player" id="player2">
+          <img src="" alt="">
+          <span class="player-name">@aguardando</span>
+        </div>
+
+        <div class="player red-player" id="player3">
+          <img src="" alt="">
+          <span class="player-name">@aguardando</span>
+        </div>
+
+        <div class="player blue-player" id="player4">
+          <img src="" alt="">
+          <span class="player-name">@aguardando</span>
+        </div>
+
+        <div class="player blue-player" id="player5">
+          <img src="" alt="">
+          <span class="player-name">@aguardando</span>
+        </div>
+
+        <div class="player blue-player" id="player6">
+          <img src="" alt="">
+          <span class="player-name">@aguardando</span>
+        </div>
+
+        <div class="player blue-player" id="player7">
+          <img src="" alt="">
+          <span class="player-name">@aguardando</span>
+        </div>
+
       </div>
-    </section>
 
-    <section class="controls">
-      <button id="start">Iniciar partida</button>
-      <button id="pause">Pausar</button>
-      <button id="reset">Resetar</button>
-      <button data-like="0">+100 curtidas A</button>
-      <button data-like="1">+100 curtidas B</button>
-      <button data-like="2">+100 curtidas C</button>
-      <button data-like="3">+100 curtidas D</button>
-      <button id="testGoal">Testar gol</button>
-    </section>
+      <div class="field-controls">
+        <button id="startBtn">▶ INICIAR</button>
+        <button id="pauseBtn">Ⅱ PAUSAR</button>
+        <button id="resetBtn">↻ RESETAR</button>
+      </div>
 
-    <section class="gifts">
-      <h2>Presentes de teste</h2>
-      <button data-gift="5655">🌹 Rose +1</button>
-      <button data-gift="5487">🫶 Finger Heart +5</button>
-      <button data-gift="5780">💐 Bouquet +20</button>
-      <button data-gift="5879">🍩 Doughnut +20</button>
-      <button data-gift="14690">⚽ League Ball</button>
-      <button data-gift="63005">🏆 Soccer Holo</button>
-    </section>
+    </div>
 
-    <section class="panel">
-      <h2>Jogadores</h2>
-      <div id="players"></div>
-    </section>
+    <aside class="side-panel">
 
-    <section class="panel">
-      <h2>Artilharia</h2>
-      <ol id="ranking"></ol>
-    </section>
+      <div class="panel">
+        <div class="panel-title">
+          <span>🎁</span>
+          INTERAÇÕES
+        </div>
 
-    <audio id="crowd" src="/audio/torcida.mp3" loop preload="auto"></audio>
-    <audio id="goalSound" src="/audio/gol.mp3" preload="auto"></audio>
-  </main>
-  <script src="/game.js"></script>
+        <p class="panel-subtitle">
+          Os presentes ajudam os jogadores durante a partida.
+        </p>
+
+        <div class="gift-list">
+
+          <div class="gift-card">
+            <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/rose.png">
+            <div>
+              <strong>Rose</strong>
+              <small>Participação +1</small>
+            </div>
+          </div>
+
+          <div class="gift-card">
+            <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a4c4dc437fd3a6632aba149769491f49.png~tplv-obj.webp">
+            <div>
+              <strong>Finger Heart</strong>
+              <small>Participação +5</small>
+            </div>
+          </div>
+
+          <div class="gift-card">
+            <span class="gift-fallback">💐</span>
+            <div>
+              <strong>Bouquet Flower</strong>
+              <small>Participação +20</small>
+            </div>
+          </div>
+
+          <div class="gift-card">
+            <span class="gift-fallback">🍩</span>
+            <div>
+              <strong>Doughnut</strong>
+              <small>Participação +20</small>
+            </div>
+          </div>
+
+          <div class="gift-card special">
+            <span class="gift-fallback">⚽</span>
+            <div>
+              <strong>League Ball</strong>
+              <small>Jogada especial</small>
+            </div>
+          </div>
+
+          <div class="gift-card special">
+            <span class="gift-fallback">🏆</span>
+            <div>
+              <strong>Soccer Holo</strong>
+              <small>Jogada rara</small>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>❤️</span>
+          PARTICIPAÇÃO
+        </div>
+
+        <div class="participation-box">
+          <strong id="totalParticipation">0</strong>
+          <span>participações na partida</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>🏆</span>
+          ARTILHARIA
+        </div>
+
+        <div id="ranking" class="ranking">
+          <div class="ranking-empty">
+            Nenhum gol ainda
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </section>
+
+</main>
+
+<div id="eventFeed" class="event-feed"></div>
+
+<audio id="crowd" src="/audio/torcida.mp3" loop></audio>
+<audio id="goalSound" src="/audio/gol.mp3"></audio>
+
+<script src="game.js"></script>
+
 </body>
 </html>
