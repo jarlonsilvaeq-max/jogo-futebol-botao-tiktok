@@ -1,674 +1,471 @@
-const field = document.querySelector(".field");
-const ball = document.getElementById("ball");
+const $ = id => document.getElementById(id);
+const pitch = $("pitch");
+const playersRoot = $("players");
+const ball = $("ball");
+const crowd = $("crowd");
+const goalSound = $("goalSound");
 
-const startBtn = document.getElementById("startBtn");
-const pauseBtn = document.getElementById("pauseBtn");
-const resetBtn = document.getElementById("resetBtn");
-
-const scoreA = document.getElementById("scoreA");
-const scoreB = document.getElementById("scoreB");
-const totalParticipation =
-  document.getElementById("totalParticipation");
-
-const matchTime = document.getElementById("matchTime");
-const ranking = document.getElementById("ranking");
-const eventFeed = document.getElementById("eventFeed");
-
-const crowd = document.getElementById("crowd");
-const goalSound = document.getElementById("goalSound");
-
-let running = false;
-let seconds = 0;
-let timer = null;
-
-let totalPart = 0;
-let goalsA = 0;
-let goalsB = 0;
-
-const players = [];
-
-const formations = [
-  { x: 18, y: 30 },
-  { x: 27, y: 65 },
-  { x: 38, y: 35 },
-  { x: 42, y: 70 },
-
-  { x: 82, y: 30 },
-  { x: 73, y: 65 },
-  { x: 62, y: 35 },
-  { x: 58, y: 70 }
+const FORMATION = [
+  { x: 17, y: 27 }, { x: 27, y: 72 },
+  { x: 39, y: 38 }, { x: 39, y: 62 },
+  { x: 83, y: 27 }, { x: 73, y: 72 },
+  { x: 61, y: 38 }, { x: 61, y: 62 }
 ];
 
-for (let i = 0; i < 8; i++) {
-
-  players.push({
-    id: i,
-    team: i < 4 ? "A" : "B",
-    x: formations[i].x,
-    y: formations[i].y,
-    likes: 0,
-    goals: 0,
-    username: `@jogador_${i + 1}`,
-    image: ""
-  });
-
-  movePlayer(i, formations[i].x, formations[i].y);
-}
-
-let ballState = {
-  x: 50,
-  y: 50,
-  owner: null
+const GIFT = {
+  5655: { name: "Rose", participation: 1 },
+  5487: { name: "Finger Heart", participation: 5 },
+  5780: { name: "Bouquet Flower", participation: 20 },
+  5879: { name: "Doughnut", participation: 20 },
+  14690: { name: "League Ball", special: true },
+  63005: { name: "Soccer Holo", rare: true }
 };
 
-function movePlayer(id, x, y) {
+const state = {
+  running: false,
+  elapsed: 0,
+  score: [0, 0],
+  totalParticipation: 0,
+  players: [],
+  owner: -1,
+  ball: { x: 50, y: 50 },
+  lastFrame: 0,
+  timer: null,
+  socket: null,
+  activity: [],
+  goalLock: false
+};
 
-  const el = document.getElementById(`player${id}`);
-
-  if (!el) return;
-
-  x = Math.max(4, Math.min(96, x));
-  y = Math.max(8, Math.min(92, y));
-
-  players[id].x = x;
-  players[id].y = y;
-
-  el.style.left = `${x}%`;
-  el.style.top = `${y}%`;
-  el.style.transform = "translate(-50%, -50%)";
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
 }
 
-function moveBall(x, y) {
+function makePlayer(id) {
+  const team = id < 4 ? 0 : 1;
+  const pos = FORMATION[id];
 
-  x = Math.max(3, Math.min(97, x));
-  y = Math.max(5, Math.min(95, y));
+  const player = {
+    id, team,
+    x: pos.x, y: pos.y,
+    homeX: pos.x, homeY: pos.y,
+    vx: 0, vy: 0,
+    username: "",
+    nickname: `Jogador ${id + 1}`,
+    avatar: "",
+    participation: 0,
+    goals: 0,
+    el: null
+  };
 
-  ballState.x = x;
-  ballState.y = y;
+  const el = document.createElement("div");
+  el.className = `player ${team === 0 ? "red" : "blue"}`;
+  el.style.left = `${player.x}%`;
+  el.style.top = `${player.y}%`;
+  el.innerHTML = `
+    <img alt="" hidden>
+    <span class="user-badge">${id + 1}</span>
+    <span class="name">Aguardando torcedor</span>
+  `;
 
-  ball.style.left = `${x}%`;
-  ball.style.top = `${y}%`;
-
-  ball.style.transform = "translate(-50%, -50%)";
+  player.el = el;
+  playersRoot.appendChild(el);
+  state.players.push(player);
+  return player;
 }
 
-function distance(a, b) {
+FORMATION.forEach((_, i) => makePlayer(i));
 
-  const dx = a.x - b.x;
-  const dy = a.y - b.y;
-
-  return Math.sqrt(dx * dx + dy * dy);
+function setPosition(el, x, y) {
+  el.style.left = `${clamp(x, 2.5, 97.5)}%`;
+  el.style.top = `${clamp(y, 3, 97)}%`;
 }
 
-function nearestPlayer() {
+function updateBall() {
+  setPosition(ball, state.ball.x, state.ball.y);
+}
 
-  let best = players[0];
-  let bestDistance = Infinity;
+function setBall(x, y, owner = state.owner) {
+  state.ball.x = clamp(x, 3, 97);
+  state.ball.y = clamp(y, 4, 96);
+  state.owner = owner;
+  updateBall();
+  const p = state.players[owner];
+  $("possession").textContent = p
+    ? `POSSE: ${p.username ? "@" + p.username : p.nickname}`
+    : "BOLA EM DISPUTA";
+}
 
-  for (const player of players) {
+function assignUser(user) {
+  const username = String(user.username || "torcedor").replace(/^@/, "");
+  let p = state.players.find(x => x.username === username);
 
-    const d = distance(player, ballState);
+  if (!p) {
+    // Atribui novos espectadores primeiro aos lugares vazios.
+    p = state.players.find(x => !x.username);
+  }
 
-    if (d < bestDistance) {
-      best = player;
-      bestDistance = d;
+  if (!p) {
+    // Se o campo estiver completo, usa o jogador com menos participação.
+    p = [...state.players].sort((a, b) =>
+      a.participation - b.participation
+    )[0];
+  }
+
+  p.username = username;
+  p.nickname = user.nickname || username;
+  p.avatar = user.avatar || p.avatar;
+
+  const img = p.el.querySelector("img");
+  const name = p.el.querySelector(".name");
+
+  if (p.avatar) {
+    img.src = p.avatar;
+    img.hidden = false;
+    img.onerror = () => { img.hidden = true; };
+  }
+
+  name.textContent = `@${username}`;
+  name.title = p.nickname;
+
+  return p;
+}
+
+function nearestPlayer(x = state.ball.x, y = state.ball.y, team = null) {
+  let best = null;
+  let bestDist = Infinity;
+
+  for (const p of state.players) {
+    if (team !== null && p.team !== team) continue;
+    const d = Math.hypot(p.x - x, p.y - y);
+    if (d < bestDist) {
+      bestDist = d;
+      best = p;
     }
   }
 
   return best;
 }
 
-function playMovement() {
+function addParticipation(user, amount) {
+  const p = assignUser(user);
+  const value = clamp(Math.floor(Number(amount) || 1), 1, 500);
 
-  const target = nearestPlayer();
+  p.participation += value;
+  state.totalParticipation += value;
 
-  if (!target) return;
+  $("totalParticipation").textContent =
+    state.totalParticipation.toLocaleString("pt-BR");
 
-  const dx = ballState.x - target.x;
-  const dy = ballState.y - target.y;
-
-  const d = Math.sqrt(dx * dx + dy * dy);
-
-  if (d > 5) {
-
-    const speed = 1.5;
-
-    movePlayer(
-      target.id,
-      target.x + (dx / d) * speed,
-      target.y + (dy / d) * speed
-    );
-
-  } else {
-
-    ballState.owner = target.id;
-
-    const direction =
-      target.team === "A"
-        ? 1
-        : -1;
-
-    const newX =
-      Math.max(
-        8,
-        Math.min(
-          92,
-          ballState.x + direction * (3 + Math.random() * 6)
-        )
-      );
-
-    const newY =
-      Math.max(
-        12,
-        Math.min(
-          88,
-          ballState.y + (Math.random() - .5) * 10
-        )
-      );
-
-    moveBall(newX, newY);
-
-    movePlayer(
-      target.id,
-      newX - direction * 2,
-      newY
-    );
+  // A cada bloco interno de participação, o jogador recebe impulso.
+  while (p.participation >= 100) {
+    p.participation -= 100;
+    impulse(p);
   }
 
-  makeOthersMove();
+  if (state.owner < 0) setBall(p.x, p.y, p.id);
 }
 
-function makeOthersMove() {
+function impulse(p) {
+  const direction = p.team === 0 ? 1 : -1;
+  p.vx += direction * 14;
+  p.vy += (Math.random() - 0.5) * 8;
 
-  players.forEach(player => {
+  setBall(
+    p.x + direction * 4,
+    p.y + (Math.random() - 0.5) * 4,
+    p.id
+  );
 
-    if (player.id === ballState.owner) return;
-
-    const home = formations[player.id];
-
-    const pressure =
-      player.team ===
-      (players[ballState.owner]?.team || "")
-        ? 3
-        : 7;
-
-    const tx =
-      home.x +
-      (Math.random() - .5) * pressure;
-
-    const ty =
-      home.y +
-      (Math.random() - .5) * pressure;
-
-    movePlayer(player.id, tx, ty);
-  });
+  addActivity(`⚡ @${p.username || p.nickname} entrou na jogada`);
 }
 
-function addParticipation(amount) {
+function applyGift(data) {
+  const gift = GIFT[Number(data.giftId)];
+  const user = {
+    username: data.username,
+    nickname: data.nickname,
+    avatar: data.avatar
+  };
 
-  totalPart += amount;
-
-  totalParticipation.textContent =
-    totalPart.toLocaleString("pt-BR");
-
-  const player = nearestPlayer();
-
-  if (player) {
-
-    player.likes += amount;
-
-    /*
-      A quantidade usada internamente para
-      impulsionar o jogador fica escondida
-      da interface.
-    */
-
-    if (player.likes >= 100) {
-
-      player.likes -= 100;
-
-      impulse(player);
-    }
-  }
-}
-
-function impulse(player) {
-
-  const direction =
-    player.team === "A"
-      ? 1
-      : -1;
-
-  movePlayer(
-    player.id,
-    player.x + direction * 8,
-    player.y + (Math.random() - .5) * 10
-  );
-
-  moveBall(
-    player.x + direction * 7,
-    player.y
-  );
-
-  showEvent(
-    `${player.username} entrou na jogada!`
-  );
-}
-
-function addGift(id) {
-
-  switch (Number(id)) {
-
-    case 5655:
-      addParticipation(1);
-      break;
-
-    case 5487:
-      addParticipation(5);
-      break;
-
-    case 5780:
-      addParticipation(20);
-      break;
-
-    case 5879:
-      addParticipation(20);
-      break;
-
-    case 14690:
-      specialPlay();
-      break;
-
-    case 63005:
-      rarePlay();
-      break;
-  }
-}
-
-function specialPlay() {
-
-  const player = nearestPlayer();
-
-  if (!player) return;
-
-  moveBall(
-    player.x +
-    (player.team === "A" ? 12 : -12),
-    player.y
-  );
-
-  showEvent(
-    `${player.username} recebeu uma jogada especial!`
-  );
-}
-
-function rarePlay() {
-
-  const player = nearestPlayer();
-
-  if (!player) return;
-
-  moveBall(
-    player.x +
-    (player.team === "A" ? 18 : -18),
-    player.y
-  );
-
-  movePlayer(
-    player.id,
-    player.x +
-    (player.team === "A" ? 12 : -12),
-    player.y
-  );
-
-  showEvent(
-    `${player.username} fez uma jogada rara!`
-  );
-}
-
-function goal(playerId) {
-
-  const player = players[playerId];
-
-  if (!player) return;
-
-  /*
-    Regra interna:
-    o jogador precisa ter acumulado
-    participação suficiente para finalizar.
-    Essa regra NÃO é exibida no jogo.
-  */
-
-  if (player.likes < 1000) {
-
-    showEvent(
-      `${player.username} ainda não está pronto para finalizar.`
-    );
-
+  if (!gift) {
+    addActivity(`🎁 @${user.username || "torcedor"} enviou ${data.giftName || "um presente"}`);
     return;
   }
 
-  player.likes -= 1000;
+  const p = assignUser(user);
+  const repeat = clamp(Number(data.repeatCount) || 1, 1, 99);
 
-  player.goals++;
-
-  if (player.team === "A") {
-    goalsA++;
-    scoreA.textContent = goalsA;
-  } else {
-    goalsB++;
-    scoreB.textContent = goalsB;
+  if (gift.participation) {
+    addParticipation(user, gift.participation * repeat);
+    addActivity(`🎁 ${gift.name}: @${p.username} +${gift.participation * repeat} participação`);
+    return;
   }
 
-  goalSound.currentTime = 0;
-  goalSound.volume = .9;
-  goalSound.play().catch(() => {});
+  if (gift.special) {
+    // Jogada especial: o jogador avança em direção ao gol adversário.
+    const dir = p.team === 0 ? 1 : -1;
+    p.vx += dir * 38;
+    p.vy += (50 - p.y) * 0.3;
+    setBall(p.x + dir * 9, p.y, p.id);
+    addActivity(`⚽ Jogada especial de @${p.username}`);
+    return;
+  }
 
-  showEvent(
-    `⚽ GOOOOOL! ${player.username}`
-  );
+  if (gift.rare) {
+    // Jogada rara: avanço maior e companheiros apoiam a jogada.
+    const dir = p.team === 0 ? 1 : -1;
+    p.vx += dir * 60;
+    setBall(p.x + dir * 14, p.y, p.id);
 
+    state.players
+      .filter(x => x.team === p.team && x.id !== p.id)
+      .forEach((mate, i) => {
+        mate.vx += dir * (12 + i * 3);
+      });
+
+    addActivity(`🏆 Jogada rara de @${p.username}`);
+  }
+}
+
+function addActivity(message) {
+  state.activity.unshift(message);
+  state.activity = state.activity.slice(0, 5);
+
+  $("activity").innerHTML = state.activity
+    .map(text => `<div class="activity-item"></div>`)
+    .join("");
+
+  [...$("activity").children].forEach((node, i) => {
+    node.textContent = state.activity[i];
+  });
+}
+
+function showGoal(p) {
+  if (state.goalLock) return;
+  state.goalLock = true;
+
+  state.score[p.team]++;
+  p.goals++;
+
+  $(`score${p.team === 0 ? "A" : "B"}`).textContent =
+    state.score[p.team];
+
+  $("goalFlash").classList.remove("show");
+  void $("goalFlash").offsetWidth;
+  $("goalFlash").classList.add("show");
+
+  // Recomeça o som no início de cada gol.
+  try {
+    goalSound.pause();
+    goalSound.currentTime = 0;
+    goalSound.volume = 0.95;
+    goalSound.play().catch(err => {
+      console.warn("O navegador bloqueou o áudio do gol:", err);
+    });
+  } catch (err) {
+    console.warn("Erro no áudio do gol:", err);
+  }
+
+  addActivity(`⚽ GOOOOL de @${p.username || p.nickname}!`);
   updateRanking();
 
-  moveBall(
-    player.team === "A" ? 94 : 6,
-    50
-  );
-
   setTimeout(() => {
-
-    moveBall(50, 50);
-
-    players.forEach((p, i) => {
-      movePlayer(i, formations[i].x, formations[i].y);
+    state.players.forEach(player => {
+      player.x = player.homeX;
+      player.y = player.homeY;
+      player.vx = 0;
+      player.vy = 0;
+      setPosition(player.el, player.x, player.y);
     });
 
-  }, 2200);
+    setBall(50, 50, -1);
+    state.goalLock = false;
+  }, 1800);
 }
 
 function updateRanking() {
-
-  const ordered =
-    [...players]
-      .filter(p => p.goals > 0)
-      .sort((a, b) => b.goals - a.goals);
+  const ordered = [...state.players]
+    .filter(p => p.goals > 0)
+    .sort((a, b) => b.goals - a.goals);
 
   if (!ordered.length) {
-
-    ranking.innerHTML =
-      `<div class="ranking-empty">
-        Nenhum gol ainda
-      </div>`;
-
+    $("ranking").innerHTML =
+      '<p class="muted">A artilharia aparece quando sair o primeiro gol.</p>';
     return;
   }
 
-  ranking.innerHTML =
-    ordered.map((p, index) => `
-      <div class="ranking-item">
-        <span class="ranking-position">
-          ${index + 1}º
-        </span>
+  $("ranking").innerHTML = ordered.map((p, i) => `
+    <div class="ranking-row">
+      <span class="rank-number">${i + 1}º</span>
+      <img class="rank-avatar" alt="" src="${p.avatar || ""}">
+      <span class="rank-name"></span>
+      <span class="rank-goals">${p.goals} gol${p.goals === 1 ? "" : "s"}</span>
+    </div>
+  `).join("");
 
-        <strong>${p.username}</strong>
-
-        <span style="margin-left:auto">
-          ${p.goals} gol${p.goals > 1 ? "s" : ""}
-        </span>
-      </div>
-    `).join("");
+  [...$("ranking").querySelectorAll(".rank-name")].forEach((el, i) => {
+    el.textContent = `@${ordered[i].username || ordered[i].nickname}`;
+  });
 }
 
-function showEvent(message) {
+function tick(dt) {
+  if (!state.running) return;
 
-  const item =
-    document.createElement("div");
+  // O jogo é simulado em tempo real; os movimentos são interpolados.
+  const owner = state.players[state.owner];
 
-  item.className = "event";
-  item.textContent = message;
+  for (const p of state.players) {
+    let tx = p.homeX;
+    let ty = p.homeY;
 
-  eventFeed.appendChild(item);
+    if (owner && p.id !== owner.id) {
+      if (p.team !== owner.team) {
+        // A defesa adversária pressiona o portador da bola.
+        tx = owner.x + (p.team === 0 ? 8 : -8);
+        ty = owner.y + (p.y < owner.y ? -7 : 7);
+      } else {
+        // Companheiros se aproximam para dar opção de passe.
+        tx = owner.x + (p.team === 0 ? 10 : -10);
+        ty = owner.y + (p.y < owner.y ? -10 : 10);
+      }
+    } else if (!owner) {
+      tx = state.ball.x;
+      ty = state.ball.y;
+    }
 
-  setTimeout(() => {
-    item.remove();
-  }, 3500);
+    // Aproximação suave ao destino.
+    const dx = tx - p.x;
+    const dy = ty - p.y;
+    p.vx += dx * 0.08;
+    p.vy += dy * 0.08;
+
+    p.vx *= 0.92;
+    p.vy *= 0.92;
+
+    p.x = clamp(p.x + p.vx * dt, 4, 96);
+    p.y = clamp(p.y + p.vy * dt, 6, 94);
+
+    setPosition(p.el, p.x, p.y);
+  }
+
+  if (owner) {
+    // A bola acompanha o portador, com pequenas variações.
+    const dir = owner.team === 0 ? 1 : -1;
+    state.ball.x += dir * dt * 2.5;
+    state.ball.y += (owner.y - state.ball.y) * 0.08;
+
+    // Pressão adversária pode causar troca de posse.
+    const defender = nearestPlayer(owner.x, owner.y, owner.team === 0 ? 1 : 0);
+    if (defender && Math.hypot(defender.x - owner.x, defender.y - owner.y) < 4) {
+      if (Math.random() < 0.025) {
+        setBall(defender.x, defender.y, defender.id);
+      }
+    }
+
+    // Finalização interna, sem expor a regra na interface.
+    if (owner.participation >= 1000 &&
+        (owner.team === 0 ? state.ball.x > 82 : state.ball.x < 18)) {
+      owner.participation -= 1000;
+      showGoal(owner);
+    }
+
+    // Passe para companheiro quando há pressão.
+    if (defender && Math.hypot(defender.x - owner.x, defender.y - owner.y) < 5 &&
+        Math.random() < 0.015) {
+      const mate = nearestPlayer(owner.x + (owner.team === 0 ? 12 : -12), owner.y, owner.team);
+      if (mate && mate.id !== owner.id) {
+        setBall(mate.x, mate.y, mate.id);
+      }
+    }
+
+    if (state.ball.x < 4 || state.ball.x > 96) {
+      setBall(50, 50, -1);
+    } else {
+      updateBall();
+    }
+  } else {
+    const candidate = nearestPlayer();
+    if (candidate && Math.hypot(candidate.x - state.ball.x, candidate.y - state.ball.y) < 4) {
+      setBall(candidate.x, candidate.y, candidate.id);
+    }
+  }
+
+  state.elapsed += dt;
+  const total = Math.floor(state.elapsed);
+  $("clock").textContent =
+    `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
-function startMatch() {
-
-  if (running) return;
-
-  running = true;
-
-  crowd.volume = .15;
-
-  crowd.play().catch(() => {});
-
-  timer = setInterval(() => {
-
-    seconds++;
-
-    const min =
-      String(Math.floor(seconds / 60))
-        .padStart(2, "0");
-
-    const sec =
-      String(seconds % 60)
-        .padStart(2, "0");
-
-    matchTime.textContent =
-      `${min}:${sec}`;
-
-  }, 1000);
-
-  showEvent("Partida iniciada!");
+function animate(now) {
+  if (!state.lastFrame) state.lastFrame = now;
+  const dt = Math.min((now - state.lastFrame) / 1000, 0.05);
+  state.lastFrame = now;
+  tick(dt);
+  requestAnimationFrame(animate);
 }
 
-function pauseMatch() {
+function connect() {
+  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+  const socket = new WebSocket(`${protocol}//${location.host}/game`);
+  state.socket = socket;
 
-  running = false;
-
-  clearInterval(timer);
-
-  crowd.pause();
-
-  showEvent("Partida pausada.");
-}
-
-function resetMatch() {
-
-  running = false;
-
-  clearInterval(timer);
-
-  seconds = 0;
-
-  goalsA = 0;
-  goalsB = 0;
-
-  totalPart = 0;
-
-  scoreA.textContent = "0";
-  scoreB.textContent = "0";
-
-  totalParticipation.textContent = "0";
-  matchTime.textContent = "00:00";
-
-  players.forEach((player, i) => {
-
-    player.likes = 0;
-    player.goals = 0;
-
-    movePlayer(
-      i,
-      formations[i].x,
-      formations[i].y
-    );
+  socket.addEventListener("open", () => {
+    $("statusText").textContent = "Servidor conectado";
   });
 
-  moveBall(50, 50);
+  socket.addEventListener("close", () => {
+    $("statusText").textContent = "Reconectando…";
+    $("statusDot").classList.remove("online");
+    setTimeout(connect, 3000);
+  });
 
-  updateRanking();
+  socket.addEventListener("error", () => {
+    $("statusText").textContent = "Falha na conexão";
+  });
 
-  crowd.pause();
-  crowd.currentTime = 0;
-
-  showEvent("Partida reiniciada.");
-}
-
-startBtn.onclick = startMatch;
-pauseBtn.onclick = pauseMatch;
-resetBtn.onclick = resetMatch;
-
-
-/* =====================================================
-   WEBSOCKET
-===================================================== */
-
-let socket;
-
-function connectWebSocket() {
-
-  const protocol =
-    location.protocol === "https:"
-      ? "wss:"
-      : "ws:";
-
-  socket =
-    new WebSocket(
-      `${protocol}//${location.host}/game`
-    );
-
-  socket.onopen = () => {
-
-    showEvent("TikTok LIVE conectado.");
-  };
-
-  socket.onclose = () => {
-
-    setTimeout(
-      connectWebSocket,
-      3000
-    );
-  };
-
-  socket.onmessage = event => {
-
+  socket.addEventListener("message", event => {
     let data;
+    try { data = JSON.parse(event.data); } catch { return; }
 
-    try {
-      data = JSON.parse(event.data);
-    } catch {
+    if (data.type === "status") {
+      const connected = data.status === "connected";
+      $("statusText").textContent = connected
+        ? `TikTok conectado: @${data.username || "085.game.players"}`
+        : data.status === "connecting"
+          ? "Conectando ao TikTok…"
+          : "TikTok desconectado";
+      $("statusDot").classList.toggle("online", connected);
       return;
     }
 
     if (data.type === "like") {
-
-      addParticipation(
-        Number(data.amount || 1)
-      );
+      addParticipation({
+        username: data.username,
+        nickname: data.nickname,
+        avatar: data.avatar
+      }, data.amount);
+      return;
     }
 
     if (data.type === "gift") {
-
-      if (data.giftId) {
-
-        addGift(
-          Number(data.giftId)
-        );
-
-      } else {
-
-        addParticipation(
-          Number(data.amount || 1)
-        );
-      }
+      applyGift(data);
     }
-
-    if (data.type === "goal") {
-
-      const player =
-        nearestPlayer();
-
-      if (player) {
-        goal(player.id);
-      }
-    }
-
-    if (data.type === "player") {
-
-      const player =
-        players[data.playerId];
-
-      if (!player) return;
-
-      player.username =
-        data.username ||
-        player.username;
-
-      const el =
-        document.getElementById(
-          `player${data.playerId}`
-        );
-
-      if (el) {
-
-        const name =
-          el.querySelector(
-            ".player-name"
-          );
-
-        if (name) {
-          name.textContent =
-            player.username;
-        }
-
-        if (data.profilePicture) {
-
-          const img =
-            el.querySelector("img");
-
-          img.src =
-            data.profilePicture;
-        }
-      }
-    }
-  };
+  });
 }
 
-connectWebSocket();
+$("startButton").addEventListener("click", async () => {
+  $("startGate").style.display = "none";
+  state.running = true;
 
+  // Navegadores móveis exigem uma interação para liberar o áudio.
+  crowd.volume = 0.16;
+  try {
+    await crowd.play();
+  } catch (err) {
+    addActivity("O navegador bloqueou a torcida. Verifique o áudio do navegador.");
+    console.warn("Não foi possível iniciar a torcida:", err);
+  }
+});
 
-/* =====================================================
-   MOVIMENTO AUTOMÁTICO
-===================================================== */
-
-setInterval(() => {
-
-  if (!running) return;
-
-  playMovement();
-
-}, 900);
-
-
-/* =====================================================
-   TESTES INTERNOS
-===================================================== */
-
-window.testLike = function(amount = 100) {
-
-  addParticipation(amount);
-};
-
-window.testGift = function(id) {
-
-  addGift(id);
-};
-
-window.testGoal = function(playerId = 0) {
-
-  players[playerId].likes = 1000;
-
-  goal(playerId);
-};
+connect();
+requestAnimationFrame(animate);
